@@ -1,3 +1,6 @@
+// Construct global variables 
+var boardSize = 15;
+
 //// Player
 const Player = (piece) => {
     this.piece = piece;
@@ -57,60 +60,128 @@ const Player = (piece) => {
         board[index] = piece;
     };
 
+    return {getState, setState};
+
  })();
 
-////TODO: Rules factory
- const rules = () => {};
-
-//TODO: Make normal class
-//// Pre-move Rules
-const preMoveRules = (() => {
-
-    // TODO: Need to make parent to inherit from for the next 4 lines to avoid repeatable code
+//// Rules factory
+const rules = ((position, piece) => {
     const lowerBound = 0;
-    const upperBound = 14;
-    const piece = boardGame.getState(position);   // Get the piece at this position
-    let rulesList = [];
+    const upperBound = boardSize*boardSize - 1;
 
-    // Check if the move will pass 
-    const checkPassesRules = (position) => {
-        // Iterate through every rule
-        for(rule in rulesList){
-            if(rule(position)==False){ //TODO????surely can write this better
-                return False;
-            };
-            return True;
-        };
-    };
+    const state = boardGame.getState(position);   // Get the piece at this position
 
     // Can't put a piece where there is already a piece
-    const checkTakenRule = (position) => {
-        if(piece == ""){
-            return True;
-        } else {
-            return False
+    const freeSpaceRule = (position, piece) => {
+            if(state == ""){
+                return True;
+            } else {
+                return False
+            };
         };
-    };
-    rulesList.push(checkTakenRule);
 
     //TODO: Double-3 rule
 
+    //// Winning condition! 5 in a row - no less and no more
+    // Vertical win condition
+
+    return {freeSpaceRule};
+
 })();
 
+//TODO: Lots of repeated code here ....
 //// Winning rules
-const winConditionRules = (() => {
-    // TODO: Need to make parent to inherit from for the next 4 lines to avoid repeatable code
-    const lowerBound = 0;
-    const upperBound = 14;
-    const piece = boardGame.getState(position);
-    let rulesList = [];
+const winConditionRules = ((position, piece) => {
 
-    // Check if a win rule has been met
+    // Check if a win rule has been met for a piece x and at position y
 
     // Vertical win condition
+    const verticalWin = () => {
+
+        // Check upwards (-15)
+        let chainPosition = position;
+        let chainLength = 0;
+        let currentPiece = piece;
+        while (chainPosition > 0 && gameBoard.getState(chainPosition) == piece){
+            chainLength += 1
+            chainPosition -= 15;
+        };
+
+        // Check downwards (+15)
+        chainPosition = position;   // Reset variables
+        currentPiece = piece;
+        while (chainPosition < boardSize * boardSize - 1 && gameBoard.getState(chainPosition) == piece) {
+            chainLength += 1
+            chainPosition += 15;
+        };
+
+        return chainLength - 1;         // -1 to compensate for counting the last-placed piece twice
+    };
+
     // Horizontal win condition
+    const horizontalWin = () => {
+        let chainPosition = position;
+        let chainLength = 0;
+
+        // Check left (-1)
+        while (chainPosition < 225 && chainPosition % 15 != 0 && gameBoard.getState(chainPosition) == piece){
+            chainLength += 1;
+            chainPosition -= 1;
+        };
+
+        // Check right (+1)
+        chainPosition = position;
+        currentPiece = piece;
+        while (chainPosition < 225 && (chainPosition + 1) % 15 != 0 && currentPiece == piece){
+            chainLength += 1;
+            chainPosition -= 1;
+            currentPiece = gameBoard.getState(chainPosition);
+        };
+    };
+
     // Negative diagonal win condition
+    const negDiagWin = () => {
+        let chainPosition = position;
+        let chainLength = 0;
+
+        // Check upwards (-16)
+        while (chainPosition > 0 && (chainPosition) % 15 != 0 && gameBoard.getState(chainPosition) == piece){
+            chainLength += 1;
+            chainPosition -= 16;
+        };
+
+        // Check downwards (+16)
+        chainPosition = position;
+        currentPiece = piece;
+        while (chainPosition < 225 && (chainPosition + 1) % 15 != 0 && currentPiece == piece){
+            chainLength += 1;
+            chainPosition -= 16;
+            currentPiece = gameBoard.getState(chainPosition);
+        };
+    };
+
     // Positive diagonal win condition
+    const posDiagWin = () => {
+        let chainPosition = position;
+        let chainLength = 0;
+
+        // Check upwards (-14)
+        while (chainPosition > 0 && (chainPosition) % 15 != 0 && gameBoard.getState(chainPosition) == piece){
+            chainLength += 1;
+            chainPosition -= 14;
+        };
+
+        // Check downwards (+14)
+        chainPosition = position;
+        currentPiece = piece;
+        while (chainPosition < 225 && (chainPosition + 1) % 15 != 0 && currentPiece == piece){
+            chainLength += 1;
+            chainPosition -= 14;
+            currentPiece = gameBoard.getState(chainPosition);
+        };
+    };
+
+    return {horizontalWin, posDiagWin, negDiagWin, verticalWin};
 
 })();
 
@@ -119,15 +190,22 @@ const gameController = (() => {
     const player1 = Player("x");
     const player2 = Player("y");
     let currPlayer = player1;
+    let lastMove = None;
 
     // Place a piece down
     const makeMove = (currPlayer, index) => {
         // Check //TODO: Is it a legitimate move?
-
-        // Has the winning condition been met?
+        if(rules.freeSpaceRule(index, currPlayer.getPiece())){
+            gameBoard.setState(index, currPlayer.getPiece());
+        }
+        lastMove = index;
+        if (currPlayer == player1){
+            
+        };
     };
 
-        // 
+    const checkWin = (index)
+
     // New game
 
     // End the game
