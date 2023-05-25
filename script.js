@@ -57,15 +57,17 @@ const game = (() => {
     const player2 = Player('O');
     let currPlayer = player1;
 
-    const playRound = (position) => {       // Place the piece down
-        gameBoard.setState(position, currPlayer.getPiece());
-        if(currPlayer == player1){
-            currPlayer = player2;
+    const playRound = (position) => {
+        if(gameBoard.getState(position) == ""){
+            gameBoard.setState(position, currPlayer.getPiece());
+            currPlayer = (currPlayer == player1 ? player2 : player1);
+            return true;
         } else {
-            currPlayer = player1;
-        }
+            return false;
+        };
     };
 
+    // All game functions
     return {playRound};
 })();
 
@@ -79,9 +81,9 @@ const displayController = (() => {
 
     fieldElements.forEach((field) =>
     field.addEventListener("click", (e) => {
-        game.playRound();
-        e.target.textContent = gameBoard.getLastPiece();
-
+        if(game.playRound(parseInt(e.target.dataset.index))){
+            e.target.textContent = gameBoard.getLastPiece();
+        };
     })
     );
 
