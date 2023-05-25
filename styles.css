@@ -1,0 +1,23 @@
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(15, 40px);
+    grid-template-rows: repeat(15, 40px);
+
+}
+
+.field {
+    border: 1px solid black;
+    text-align: center;
+    background-color: white;
+    line-height: 40px;
+    font-size: 30px;
+
+}
+
+.field:hover {
+    background-color: grey;
+}
+
+.options {
+    display: flexbox;
+}
