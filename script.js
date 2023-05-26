@@ -66,6 +66,8 @@ const rule = (() => {
 const game = (() => {
     const player1 = Player('X');
     const player2 = Player('O');
+    let player1Score = 0;
+    let player2Score = 0;
     let currPlayer = player1;
     let winnerFound = false;
 
@@ -76,6 +78,13 @@ const game = (() => {
             gameBoard.setState(position, currPlayer.getPiece());
             // Check if won
             winnerFound = winningRule(position, 1) || winningRule(position, 14) || winningRule(position, 15) || winningRule(position, 16);
+            if (winnerFound) {
+                if (currPlayer == player1){
+                    player1Score += 1;
+                } else {
+                    player2Score += 1;
+                };
+            };
             currPlayer = (currPlayer == player1 ? player2 : player1);
             return true;
         } else {
@@ -93,30 +102,30 @@ const game = (() => {
         const piece = gameBoard.getState(position);
         let length = 0;
         let chainPosition = position;
-        let leftBoundCondition = true;
-        let rightBoundCondition = true;
-        let bottomBoundCondition = true;
-        let topBoundCondition = true;
+        let leftCondition = true;
+        let rightCondition = true;
+        let bottomCondition = true;
+        let topCondition = true;
 
-        while (leftBoundCondition && rightBoundCondition && bottomBoundCondition && topBoundCondition && gameBoard.getState(chainPosition) == piece) {
+        while (leftCondition && rightCondition && bottomCondition && topCondition && gameBoard.getState(chainPosition) == piece) {
             length += 1;
             chainPosition += increment;
             //// Conditions of the loop
             // Do the loop conditions still hold?
-            leftBoundCondition = (chainPosition - increment)%15 != 0    // The chain position did not over the left boundary during this loop
+            leftCondition = (chainPosition - increment)%15 != 0    // The chain position did not over the left boundary during this loop
                                 || increment == 15                      // Or it is not a vertical probe (side bounds don't matter)
                                 || (increment == 1) || (increment == -14) || (increment == 16);  // Or the probe is moving rightwards
 
             // Has the chain position now crossed the right bound of the gameboard?
-            rightBoundCondition = (chainPosition - increment + 1)%15 != 0     // The chain position did not over the right boundary during this loop
+            rightCondition = (chainPosition - increment + 1)%15 != 0     // The chain position did not over the right boundary during this loop
                                 || increment == 15  
                                 || (increment == -1) || (increment == 14) || (increment == -16);    // The chain position is moving leftwards                    
             
             // Has the chain position now crossed the bottom bound of the gameboard?
-            bottomBoundCondition = chainPosition < 225;
+            bottomCondition = chainPosition < 225;
 
             // Has the chain position now crossed the top bound of the gameboard?
-            topBoundCondition = chainPosition > -1;
+            topCondition = chainPosition > -1;
         };
         return length;
     };
@@ -125,6 +134,15 @@ const game = (() => {
         winnerFound = false;
         currPlayer = player1;
         gameBoard.resetBoard();
+    };
+
+    const forfeitGame = () => {
+        if (currPlayer == player2){
+            player1Score += 1;
+        } else {
+            player2Score += 1;
+        };        
+        resetGame();
     };
 
     const getCurrentPlayer = () => {
@@ -141,8 +159,16 @@ const game = (() => {
         return `${piece} won!`
     };
 
+    const getPlayer1Score = () => {
+        return player1Score;
+    }
+
+    const getPlayer2Score = () => {
+        return player2Score;
+    }
+
     // All game functions
-    return {playRound, winningRule, getCurrentPlayer, gameEnded, resetGame, getWinningMessage};
+    return {playRound, winningRule, getCurrentPlayer, gameEnded, resetGame, forfeitGame, getWinningMessage, getPlayer1Score, getPlayer2Score};
 })();
 
 
@@ -152,6 +178,8 @@ const displayController = (() => {
     const resetButton = document.getElementById("reset-button");
     const forfeitButton = document.getElementById("forfeit-button");
     const mainMessageBoard = document.querySelector(".message-board")
+    const player1Score = document.getElementById("player1-score");
+    const player2Score = document.getElementById("player2-score");
 
     // After clicking a cell ...
     fieldElements.forEach((field) =>
@@ -161,17 +189,35 @@ const displayController = (() => {
         };
         if(game.gameEnded()){                                     // Check if game ended with a winner
             mainMessageBoard.textContent = game.getWinningMessage();
+            player1Score.firstElementChild.textContent = game.getPlayer1Score();
+            player2Score.firstElementChild.textContent = game.getPlayer2Score();
         };
     })
     );
 
+    // Reset the game but not the scores
     resetButton.addEventListener("click", () => {
-        game.resetGame();
+        game.resetGame();   // JS logic
+        resetBoard();   // DOM logic
+    }
+    );
+
+    // Forfeit ...
+    forfeitButton.addEventListener("click", () => {
+        game.forfeitGame();
+        resetBoard();
+        player1Score.firstElementChild.textContent = game.getPlayer1Score();
+        player2Score.firstElementChild.textContent = game.getPlayer2Score();
+    })
+
+    // Reset board
+    const resetBoard = () => {
         for(i = 0; i < fieldElements.length; i++){                  // Reset board
             fieldElements[i].textContent = "";
         }
         mainMessageBoard.textContent = "Play Omok!";    // Reset main message board
-    });
+    };
+
 });
 
 displayController();
