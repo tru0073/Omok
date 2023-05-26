@@ -1,23 +1,62 @@
-.gameboard {
-    display: grid;
-    grid-template-columns: repeat(15, 40px);
-    grid-template-rows: repeat(15, 40px);
+:root {
+    --page-background-color: #CDD8EE;
+    --tile-background-color: #F1F5FC;
+    --hover-tile-background-color: #D7E5FC;
+    --font: 'Varela Round', sans-serif;
+    --box-border-color: #B6C9E9;
+    --box-background-color: #EAF0FA;
+    --main-message-font-size: 20px;
+    --scoreboard-font-size: 100px;
 
 }
 
-.field {
-    border: 1px solid black;
+body {
+    font-family: var(--font);
+    background-color: var(--page-background-color);
+}
+
+.message-board {
     text-align: center;
-    background-color: white;
+    border: 4px solid var(--box-border-color);
+    background-color: var(--box-background-color);
+    width: 30%;
+    padding: 20px;
+    margin: 20px auto;
+    font-size: var(--main-message-font-size);
+}
+
+.gameboard {
+    display: grid;
+    grid-template-columns: repeat(15, 36px);
+    grid-template-rows: repeat(15, 36px);
+    margin: auto;
+    width: 540px;
+    border: 0.75px solid black;
+    background-color: var(--tile-background-color);
+}
+
+
+.field {
+    border: 0.5px solid black;
+    text-align: center;
     line-height: 40px;
     font-size: 30px;
 
 }
 
 .field:hover {
-    background-color: grey;
+    background-color: var(--hover-tile-background-color);
 }
 
 .options {
-    display: flexbox;
+    display: flex;
+    justify-content: center;
+    margin: 15px;
+    gap: 8px;
+}
+
+button {
+    border: 3px solid var(--box-border-color);
+    background-color: var(--box-background-color);
+    padding: 10px;
 }
