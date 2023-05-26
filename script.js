@@ -58,34 +58,9 @@ const rule = (() => {
         return gameBoard.getState(position) == "";
     };
 
-    const winningRule = (position, increment) => {    // 1 (horizontal), 14 (posDiag), 15 (vertical), 16 (negDiag) for different orientations
-        const piece = gameBoard.getState(position);
-        let length = 0;
-        let chainPosition = position;
-        // Check upwards
-        do {
-            length += 1;
-            chainPosition -= increment;     // Move the chain position
-        } while ((chainPosition % 15 != 0 && increment != 15)   // Ends at left border unless checking vertical win condition
-                || (((chainPosition + 1) % 15) != 0 && increment != 15)      // Ends at right border unless ... same as above
-                && (chainPosition < 225) && chainPosition > 0
-                && gameBoard.getState(chainPosition) == piece)
-
-        // Check downwards    
-        chainPosition = position;    
-        do {
-            length += 1;
-            chainPosition += increment;     // Move the chain position
-        } while ((chainPosition % 15 != 0 && increment != 15)   // Ends at left border unless checking vertical win condition
-                || (((chainPosition + 1) % 15) != 0 && increment != 15)      // Ends at right border unless ... same as above
-                && (chainPosition < 225) && chainPosition > 0
-                && gameBoard.getState(chainPosition) == piece)
-
-        return length -= 1;     // -1 to compensate for counting position twice
-        };
-
-    return {freeSpaceRule, winningRule};
+    return {freeSpaceRule};
 })();
+
 
 // Gameplay - operate the game and returns attributes about the game state
 const game = (() => {
@@ -97,9 +72,10 @@ const game = (() => {
     // Main function to play the round
     const playRound = (position) => {
         // Pre-move checks
-        if(rule.freeSpaceRule(position)){
+        if(rule.freeSpaceRule(position) && winnerFound == false){
             gameBoard.setState(position, currPlayer.getPiece());
             // Check if won
+            winnerFound = winningRule(position, 1) || winningRule(position, 14) || winningRule(position, 15) || winningRule(position, 16);
             currPlayer = (currPlayer == player1 ? player2 : player1);
             return true;
         } else {
@@ -107,8 +83,9 @@ const game = (() => {
         };
     };
 
+    // Has the game been won?
     const winningRule = (position, increment) => {    // 1 (horizontal), 14 (posDiag), 15 (vertical), 16 (negDiag) for different orientations
-        return probeChain(position, increment) + probeChain(position, -increment) - 1;  // -1 to compensate for counting position twice
+        return (probeChain(position, increment) + probeChain(position, -increment) - 1) == 5;  // -1 to compensate for counting position twice
     };
 
     
@@ -121,7 +98,7 @@ const game = (() => {
         let bottomBoundCondition = true;
         let topBoundCondition = true;
 
-        while (leftBoundCondition && rightBoundCondition && bottomBoundCondition && topBoundCondition) {
+        while (leftBoundCondition && rightBoundCondition && bottomBoundCondition && topBoundCondition && gameBoard.getState(chainPosition) == piece) {
             length += 1;
             chainPosition += increment;
             //// Conditions of the loop
@@ -141,8 +118,13 @@ const game = (() => {
             // Has the chain position now crossed the top bound of the gameboard?
             topBoundCondition = chainPosition > -1;
         };
-
         return length;
+    };
+
+    const resetGame = () => {
+        winnerFound = false;
+        currPlayer = player1;
+        gameBoard.resetBoard();
     };
 
     const getCurrentPlayer = () => {
@@ -153,8 +135,14 @@ const game = (() => {
         return winnerFound;
     };
 
+    const getWinningMessage = () => {
+        const winner = (currPlayer == player1 ? player2 : player1);
+        const piece = winner.getPiece();
+        return `${piece} won!`
+    };
+
     // All game functions
-    return {playRound, winningRule, getCurrentPlayer, gameEnded, probeChain};
+    return {playRound, winningRule, getCurrentPlayer, gameEnded, resetGame, getWinningMessage};
 })();
 
 
@@ -168,19 +156,22 @@ const displayController = (() => {
     // After clicking a cell ...
     fieldElements.forEach((field) =>
     field.addEventListener("click", (e) => {
-        if(game.playRound(parseInt(e.target.dataset.index))){   // If valid move, then update the board
+        if(game.playRound(parseInt(e.target.dataset.index))){   // If a move has been played, then update the board
             e.target.textContent = gameBoard.getLastPiece();
+        };
+        if(game.gameEnded()){                                     // Check if game ended with a winner
+            mainMessageBoard.textContent = game.getWinningMessage();
         };
     })
     );
 
     resetButton.addEventListener("click", () => {
-        gameBoard.resetBoard();
-        for(i = 0; i < fieldElements.length; i++){
+        game.resetGame();
+        for(i = 0; i < fieldElements.length; i++){                  // Reset board
             fieldElements[i].textContent = "";
         }
+        mainMessageBoard.textContent = "Play Omok!";    // Reset main message board
     });
 });
 
 displayController();
-console.log(game.probeChain(14, -15));
