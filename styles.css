@@ -5,6 +5,7 @@
     --font: 'Varela Round', sans-serif;
     --box-border-color: #B6C9E9;
     --box-background-color: #EAF0FA;
+    --score-text-color: #837b84;
     --main-message-font-size: 20px;
     --scoreboard-font-size: 100px;
 
@@ -25,6 +26,12 @@ body {
     font-size: var(--main-message-font-size);
 }
 
+.game {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .gameboard {
     display: grid;
     grid-template-columns: repeat(15, 36px);
@@ -34,7 +41,6 @@ body {
     border: 0.75px solid black;
     background-color: var(--tile-background-color);
 }
-
 
 .field {
     border: 0.5px solid black;
@@ -46,6 +52,23 @@ body {
 
 .field:hover {
     background-color: var(--hover-tile-background-color);
+}
+
+.scoreboard {
+    text-align: center;
+    width: 40%;
+    padding: 10px;
+    margin: 100px;
+    border: 1px solid black;
+    font-size: 30px;
+    color: var(--score-text-color);
+}
+
+.card {
+    height: 50%;
+    border: 1px solid black;
+    margin: 20px;
+    font-size: 50px;
 }
 
 .options {
