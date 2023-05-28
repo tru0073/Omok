@@ -6,8 +6,10 @@
     --box-border-color: #B6C9E9;
     --box-background-color: #EAF0FA;
     --score-text-color: #837b84;
-    --main-message-font-size: 20px;
-    --scoreboard-font-size: 100px;
+    --main-message-font-size: 50px;
+    --scoreboard-font-size: 10px;
+    --x-color: #c97b7b;
+    --o-color: #5e98c4;
 
 }
 
@@ -18,10 +20,7 @@ body {
 
 .message-board {
     text-align: center;
-    border: 4px solid var(--box-border-color);
-    background-color: var(--box-background-color);
-    width: 30%;
-    padding: 20px;
+    width: 50%;
     margin: 20px auto;
     font-size: var(--main-message-font-size);
 }
@@ -59,16 +58,23 @@ body {
     width: 40%;
     padding: 10px;
     margin: 100px;
-    border: 1px solid black;
     font-size: 30px;
     color: var(--score-text-color);
 }
 
 .card {
     height: 50%;
-    border: 1px solid black;
     margin: 20px;
     font-size: 50px;
+    color: black;
+}
+
+#player1-score {
+    color: var(--x-color);
+}
+
+#player2-score {
+    color: var(--o-color);
 }
 
 .options {
