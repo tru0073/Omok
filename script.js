@@ -1,34 +1,34 @@
-// Player
+//Player
 const Player = (piece) => {
-    this.piece = piece; 
+    this.piece = piece;
 
     const getPiece = () => {
         return piece;
-    }
+    };
 
-    return {getPiece};
+    return { getPiece };
 };
 
 
-//// Gameboard - perform operations on the game board and deal with attributes about the gameboard
+////Gameboard - perform operations on the game board and deal with attributes about the gameboard
 const gameBoard = (() => {
     let lastPiecePlayed = "X";
 
-    const board = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
+    const board = ["", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+        "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""];
 
     const setState = (position, piece) => {
         board[position] = piece;
@@ -40,17 +40,18 @@ const gameBoard = (() => {
     };
 
     const resetBoard = () => {
-        for(let i=0; i < board.length; i++){
+        for (let i = 0; i < board.length; i++) {
             board[i] = "";
         };
     };
 
     const getLastPiece = () => {
         return lastPiecePlayed;
-    }
+    };
 
-    return {setState, getState, resetBoard, getLastPiece};
+    return { setState, getState, resetBoard, getLastPiece };
 })();
+
 
 
 const rule = (() => {
@@ -62,7 +63,7 @@ const rule = (() => {
 })();
 
 
-// Gameplay - operate the game and returns attributes about the game state
+//Gameplay - operate the game and returns attributes about the game state
 const game = (() => {
     const player1 = Player('X');
     const player2 = Player('O');
@@ -71,12 +72,12 @@ const game = (() => {
     let currPlayer = player1;
     let winnerFound = false;
 
-    // Main function to play the round
+    //Main function to play the round
     const playRound = (position) => {
-        // Pre-move checks
+        //Pre-move checks
         if(rule.freeSpaceRule(position) && winnerFound == false){
             gameBoard.setState(position, currPlayer.getPiece());
-            // Check if won
+            //Check if won
             winnerFound = winningRule(position, 1) || winningRule(position, 14) || winningRule(position, 15) || winningRule(position, 16);
             if (winnerFound) {
                 if (currPlayer == player1){
@@ -92,7 +93,7 @@ const game = (() => {
         };
     };
 
-    // Has the game been won?
+    //Has the game been won?
     const winningRule = (position, increment) => {    // 1 (horizontal), 14 (posDiag), 15 (vertical), 16 (negDiag) for different orientations
         return (probeChain(position, increment) + probeChain(position, -increment) - 1) == 5;  // -1 to compensate for counting position twice
     };
@@ -111,20 +112,20 @@ const game = (() => {
             length += 1;
             chainPosition += increment;
             //// Conditions of the loop
-            // Do the loop conditions still hold?
+            //Do the loop conditions still hold?
             leftCondition = (chainPosition - increment)%15 != 0    // The chain position did not over the left boundary during this loop
                                 || increment == 15                      // Or it is not a vertical probe (side bounds don't matter)
                                 || (increment == 1) || (increment == -14) || (increment == 16);  // Or the probe is moving rightwards
 
-            // Has the chain position now crossed the right bound of the gameboard?
+            //Has the chain position now crossed the right bound of the gameboard?
             rightCondition = (chainPosition - increment + 1)%15 != 0     // The chain position did not over the right boundary during this loop
                                 || increment == 15  
                                 || (increment == -1) || (increment == 14) || (increment == -16);    // The chain position is moving leftwards                    
             
-            // Has the chain position now crossed the bottom bound of the gameboard?
+            //Has the chain position now crossed the bottom bound of the gameboard?
             bottomCondition = chainPosition < 225;
 
-            // Has the chain position now crossed the top bound of the gameboard?
+            //Has the chain position now crossed the top bound of the gameboard?
             topCondition = chainPosition > -1;
         };
         return length;
@@ -174,20 +175,25 @@ const game = (() => {
 
 //// DOM logic
 const displayController = (() => {
-    const fieldElements = document.querySelectorAll(".field");  // Select all fields  
+    const fieldElements = document.querySelectorAll(".field");  //Select all fields  
     const resetButton = document.getElementById("reset-button");
     const forfeitButton = document.getElementById("forfeit-button");
     const mainMessageBoard = document.querySelector(".message-board")
     const player1Score = document.getElementById("player1-score");
     const player2Score = document.getElementById("player2-score");
+    const color1 = "#bd482d";
+    const color2 = "#3886c2";
+    let currColor = color1;
 
     // After clicking a cell ...
     fieldElements.forEach((field) =>
     field.addEventListener("click", (e) => {
-        if(game.playRound(parseInt(e.target.dataset.index))){   // If a move has been played, then update the board
+        if(game.playRound(parseInt(e.target.dataset.index))){   //If a move has been played, then update the board
             e.target.textContent = gameBoard.getLastPiece();
+            e.target.style.color = currColor;
+            currColor = (currColor == color1 ? color2 : color1);    //Switch colours
         };
-        if(game.gameEnded()){                                     // Check if game ended with a winner
+        if(game.gameEnded()){                                     //Check if game ended with a winner
             mainMessageBoard.textContent = game.getWinningMessage();
             player1Score.firstElementChild.textContent = game.getPlayer1Score();
             player2Score.firstElementChild.textContent = game.getPlayer2Score();
@@ -212,10 +218,10 @@ const displayController = (() => {
 
     // Reset board
     const resetBoard = () => {
-        for(i = 0; i < fieldElements.length; i++){                  // Reset board
+        for(i = 0; i < fieldElements.length; i++){                  //Reset board
             fieldElements[i].textContent = "";
         }
-        mainMessageBoard.textContent = "Play Omok!";    // Reset main message board
+        mainMessageBoard.textContent = "Play Omok!";    //Reset main message board
     };
 
 });
