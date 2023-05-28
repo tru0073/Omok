@@ -210,10 +210,12 @@ const displayController = (() => {
 
     // Forfeit ...
     forfeitButton.addEventListener("click", () => {
-        game.forfeitGame();
-        resetBoard();
-        player1Score.firstElementChild.textContent = game.getPlayer1Score();
-        player2Score.firstElementChild.textContent = game.getPlayer2Score();
+        if(game.gameEnded() == false){
+            game.forfeitGame();
+            resetBoard();
+            player1Score.firstElementChild.textContent = game.getPlayer1Score();
+            player2Score.firstElementChild.textContent = game.getPlayer2Score();
+        };
     })
 
     // Reset board
